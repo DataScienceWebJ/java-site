@@ -1,0 +1,123 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Java - Главная</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .scroll-section {
+      scroll-margin-top: 80px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+  <!-- Навигация -->
+  <nav class="bg-blue-600 text-white fixed w-full top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex-shrink-0">
+          <h1 class="text-2xl font-bold">Java</h1>
+        </div>
+        <div class="hidden md:flex space-x-8">
+          <a href="index.html" class="hover:text-gray-200 font-semibold">Главная</a>
+          <a href="examples.html" class="hover:text-gray-200">Примеры кода</a>
+          <a href="about.html" class="hover:text-gray-200">О Java</a>
+        </div>
+        <div class="md:hidden">
+          <button id="menu-toggle" class="focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-blue-600">
+      <div class="px-4 pt-2 pb-3 space-y-1">
+        <a href="index.html" class="block text-white hover:bg-blue-700 px-3 py-2 rounded-md font-semibold">Главная</a>
+        <a href="examples.html" class="block text-white hover:bg-blue-700 px-3 py-2 rounded-md">Примеры кода</a>
+        <a href="about.html" class="block text-white hover:bg-blue-700 px-3 py-2 rounded-md">О Java</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Главный баннер -->
+  <section id="home" class="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white pt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-4xl md:text-5xl font-extrabold mb-4">Добро пожаловать в мир Java</h2>
+      <p class="text-lg md:text-xl mb-6">Мощный, надежный и универсальный язык программирования для современных приложений.</p>
+      <a href="about.html" class="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition">Узнать больше</a>
+    </div>
+  </section>
+
+  <!-- Преимущества -->
+  <section id="features" class="py-16 bg-white scroll-section">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center mb-12">Почему Java?</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-4">Кроссплатформенность</h3>
+          <p>Запускайте код на любой платформе с установленной JVM.</p>
+        </div>
+        <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-4">Масштабируемость</h3>
+          <p>Создавайте приложения от простых скриптов до сложных систем.</p>
+        </div>
+        <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-4">Сообщество</h3>
+          <p>Миллионы разработчиков и тысячи библиотек для любых задач.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JavaScript для мобильного меню -->
+  <script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuToggle.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>
